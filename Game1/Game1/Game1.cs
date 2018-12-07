@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -17,6 +18,8 @@ namespace Game1
             pause,
             play
         }
+        public static Rectangle window;
+        public static Random rng;
         Meny gameState = Meny.main;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -48,6 +51,8 @@ namespace Game1
             IsMouseVisible = true;
             karaktärsList.Add(new Spelare(spelareTex, StartPos, shotTex));
             karta = new Karta(kartaTex, new Vector2(0, 0), stenTex, markTex);
+            window = Window.ClientBounds;
+            rng = new Random();
         }
 
         /// <summary>
@@ -103,12 +108,26 @@ namespace Game1
                 foreach(Karaktär karaktär in karaktärsList)
                 {
                     karaktär.Update(karta);
+                    if(karaktär is Enemy)
+                    {
+                        foreach(Karaktär karaktär2 in karaktärsList)
+                        {
+                            if (karaktär.hitbox.Intersects(karaktär2.hitbox) && karaktär2 is Spelare)
+                            {
+                                karaktär2.hp -= karaktär.dmg;
+                            }
+                        }
+                    }
+                    if(karaktär.hp <= 0)
+                    {
+                        //karaktär ISDEAD
+                    }
                 }
                 karta.Update();
                 base.Update(gameTime);
             }
         }
-
+        
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>

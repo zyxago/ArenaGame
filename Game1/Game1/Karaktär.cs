@@ -9,28 +9,17 @@ using System.Threading.Tasks;
 
 namespace Game1
 {
-    public interface IMove
-    {
-        void Move();
-    }
-    public interface IAttack
-    {
-        void Attack();
-    }
 
     abstract class Karaktär
     {
         protected Texture2D textur;
-        protected Texture2D shotTex;
-        protected Rectangle hitbox { get; set; }
+        public Rectangle hitbox { get; set; }
         protected Rectangle hitboxTemp { get; set; }
         protected Vector2 position;
         protected int size;
-        protected int hp;
+        public int hp { get; set; }
+        public int dmg { get; set; }
         protected float speed;
-        protected List<Projectile> projectileList;
-        protected int shotSpeed;
-        protected int shotSize;
         protected int attackDelay;
         protected CollisionDir collisionDir;
         [Flags]
@@ -59,5 +48,6 @@ namespace Game1
         {
             spriteBatch.Draw(textur,hitbox,Color.Black);
         }
+        public abstract void Move();
     }
 }

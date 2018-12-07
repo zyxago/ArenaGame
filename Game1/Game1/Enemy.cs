@@ -10,13 +10,13 @@ namespace Game1
 {
     class Enemy:Karaktär
     {
-        Random rng = new Random();
         Vector2 direction;
         int defaultDirTime = 20;
         int dirTime;
 
         public Enemy(Texture2D tex, Vector2 pos):base(tex, pos)
         {
+            dmg = 1;
             hp = 10;
             size = 40;
             speed = 3;
@@ -37,7 +37,7 @@ namespace Game1
             base.Update(karta);
         }
 
-        public void CheckWallCollision(Karta karta)
+        private void CheckWallCollision(Karta karta)
         {
             collisionDir = CollisionDir.None;
             foreach (Grid grid in karta.gridArray)
@@ -66,35 +66,30 @@ namespace Game1
             }
         }
 
-        public void Move()//Fix!!!
+        public override void Move()
         {
-            if ((collisionDir & CollisionDir.North) != CollisionDir.North)
+            if ((collisionDir & CollisionDir.North) != CollisionDir.North && position.Y > 0)
             {
-                position += speed * direction;
+                position.Y -= speed * direction.Y;
             }
-            if ((collisionDir & CollisionDir.South) != CollisionDir.South)
+            else if ((collisionDir & CollisionDir.South) != CollisionDir.South && position.Y < Game1.window.Height)
             {
-                position += speed * direction;
+                position.Y += speed * direction.Y;
             }
-            if ((collisionDir & CollisionDir.West) != CollisionDir.West)
+            if ((collisionDir & CollisionDir.West) != CollisionDir.West && position.X > 0)
             {
-                position += speed * direction;
+                position.X -= speed * direction.X;
             }
-            if ((collisionDir & CollisionDir.East) != CollisionDir.East)
+            else if ((collisionDir & CollisionDir.East) != CollisionDir.East && position.X < Game1.window.Width)
             {
-                position += speed * direction;
+                position.X += speed * direction.X;
             }
         }
 
-        public void Direction()
+        private void Direction()
         {
-            direction = new Vector2(rng.Next(-100,100), rng.Next(-100,100));
+            direction = new Vector2(Game1.rng.Next(-100,100), Game1.rng.Next(-100,100));
             direction.Normalize();
-        }
-
-        public void Attack()
-        {
-
         }
     }
 }

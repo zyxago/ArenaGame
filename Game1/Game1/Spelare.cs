@@ -10,10 +10,14 @@ using System.IO;
 
 namespace Game1
 {
-    class Spelare:Karaktär, IMove, IAttack
+    class Spelare:Karaktär
     {
         BinaryWriter bw;
         BinaryReader br;
+        List<Projectile> projectileList;
+        int shotSpeed;
+        int shotSize;
+        Texture2D shotTex;
         public Spelare(Texture2D tex, Vector2 pos, Texture2D shotTex):base(tex, pos)
         {
             LoadData(br, bw);
@@ -21,7 +25,7 @@ namespace Game1
             this.shotTex = shotTex;
         }
 
-        public void LoadData(BinaryReader br, BinaryWriter bw)
+        private void LoadData(BinaryReader br, BinaryWriter bw)
         {
             if (!File.Exists("SpelareStats.dat"))
             {
@@ -55,7 +59,7 @@ namespace Game1
             }
         }
 
-        public void SaveData(BinaryWriter bw)
+        private void SaveData(BinaryWriter bw)
         {
             bw = new BinaryWriter(new FileStream("SpelareStats.dat", FileMode.OpenOrCreate, FileAccess.Write));
             bw.Write(hp);
@@ -93,18 +97,18 @@ namespace Game1
             base.Update(karta);
         }
 
-        public void Attack()
+        private void Attack()
         {
             projectileList.Add(new Shot(shotTex, new Vector2(position.X + size / 2, position.Y + size / 2), shotSpeed, shotSize));
         }
 
-        public void Move()
+        public override void Move()
         {
             if(Keyboard.GetState().IsKeyDown(Keys.W) && position.Y > 0 && (collisionDir & CollisionDir.North) != CollisionDir.North)
             {
                 position.Y -= speed;
             }
-            if (Keyboard.GetState().IsKeyDown(Keys.S) && position.Y < 450 && (collisionDir & CollisionDir.South) != CollisionDir.South)
+            if (Keyboard.GetState().IsKeyDown(Keys.S) && position.Y < Game1.window.Height-size && (collisionDir & CollisionDir.South) != CollisionDir.South)
             {
                 position.Y += speed;
             }
@@ -112,7 +116,7 @@ namespace Game1
             {
                 position.X -= speed;
             }
-            if (Keyboard.GetState().IsKeyDown(Keys.D) && position.X < 770 && (collisionDir & CollisionDir.East) != CollisionDir.East)
+            if (Keyboard.GetState().IsKeyDown(Keys.D) && position.X < Game1.window.Width-size && (collisionDir & CollisionDir.East) != CollisionDir.East)
             {
                 position.X += speed;
             }
