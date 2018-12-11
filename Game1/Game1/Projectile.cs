@@ -13,6 +13,7 @@ namespace Game1
     {
         protected int speed;
         protected int size;
+        public int dmg;
         protected Texture2D tex;
         protected Vector2 pos { get; set; }
         protected Vector2 direction;

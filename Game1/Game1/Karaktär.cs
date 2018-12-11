@@ -22,6 +22,7 @@ namespace Game1
         protected float speed;
         protected int attackDelay;
         protected CollisionDir collisionDir;
+        public bool isDead { get; set; }
         [Flags]
         protected enum CollisionDir
         {
@@ -37,6 +38,7 @@ namespace Game1
             position = pos;
             hitbox = new Rectangle((int)position.X, (int)position.Y, size, size);
             textur = tex;
+            isDead = false;
         }
 
         public virtual void Update(Karta karta)
@@ -46,7 +48,7 @@ namespace Game1
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(textur,hitbox,Color.Black);
+            spriteBatch.Draw(textur,hitbox,Color.White);
         }
         public abstract void Move();
     }

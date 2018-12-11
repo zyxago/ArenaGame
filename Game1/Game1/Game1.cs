@@ -16,7 +16,9 @@ namespace Game1
         {
             main,
             pause,
-            play
+            play,
+            gameover,
+            restart
         }
         public static Rectangle window;
         public static Random rng;
@@ -98,18 +100,22 @@ namespace Game1
             }
             else if(gameState == Meny.play)
             {
-                if(karaktärsList.Count <= 10)
+                /*if(karaktärsList.Count <= 1)//test, add enemy
                 {
                     for (int i = 0; i < 10; i++)
                     {
                         karaktärsList.Add(new Enemy(spelareTex, new Vector2(400, 200)));
                     }
-                }
+                }*/
                 foreach(Karaktär karaktär in karaktärsList)
                 {
                     karaktär.Update(karta);
                     if(karaktär is Enemy)
                     {
+                        if(karaktär.isDead == true)
+                        {
+                            karaktärsList.Remove(karaktär);
+                        }
                         foreach(Karaktär karaktär2 in karaktärsList)
                         {
                             if (karaktär.hitbox.Intersects(karaktär2.hitbox) && karaktär2 is Spelare)
@@ -118,13 +124,39 @@ namespace Game1
                             }
                         }
                     }
+                    if(karaktär is Spelare)
+                    {
+                        //Check if projectile intersects enemy
+                        Spelare spelare = karaktär as Spelare;
+                        foreach(Projectile projectile in spelare.projectileList)
+                        {
+                            foreach(Karaktär karaktär2 in karaktärsList)
+                            {
+                                if (projectile.Hitbox.Intersects(karaktär2.hitbox) && karaktär2 is Enemy)
+                                {
+                                    karaktär2.hp -= projectile.dmg;
+                                }
+                            }
+                        }
+                        if(spelare.isDead) 
+                        {
+                            gameState = Meny.gameover;
+                        }
+                    }
                     if(karaktär.hp <= 0)
                     {
-                        //karaktär ISDEAD
+                        karaktär.isDead = true;
                     }
                 }
                 karta.Update();
                 base.Update(gameTime);
+            }
+            else if(gameState == Meny.gameover)
+            {
+                if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+                {
+                    gameState = Meny.restart;
+                }
             }
         }
         
@@ -147,6 +179,11 @@ namespace Game1
                 {
                     karaktär.Draw(spriteBatch);
                 }
+            }
+            else if(gameState == Meny.gameover)
+            {
+                spriteBatch.DrawString(font1, "GAMEOVER", new Vector2(300, 200), Color.Black);
+                spriteBatch.DrawString(font1, "Press Enter to restart", new Vector2(280, 220), Color.Black);
             }
 
             spriteBatch.End();

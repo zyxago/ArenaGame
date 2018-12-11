@@ -17,7 +17,7 @@ namespace Game1
         public Enemy(Texture2D tex, Vector2 pos):base(tex, pos)
         {
             dmg = 1;
-            hp = 10;
+            hp = 1;
             size = 40;
             speed = 3;
             attackDelay = 20;
@@ -48,10 +48,10 @@ namespace Game1
                 {
                     collisionDir |= CollisionDir.North;
                 }
-                hitboxTemp = new Rectangle((int)(position.X - speed), (int)position.Y, size, size);
+                hitboxTemp = new Rectangle((int)(position.X ), (int)(position.Y + speed), size, size);
                 if (hitboxTemp.Intersects(grid.GridBox) && grid.isSolid)
                 {
-                    collisionDir |= CollisionDir.West;
+                    collisionDir |= CollisionDir.South;
                 }
                 hitboxTemp = new Rectangle((int)(position.X - speed), (int)position.Y, size, size);
                 if (hitboxTemp.Intersects(grid.GridBox) && grid.isSolid)

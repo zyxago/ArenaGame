@@ -14,7 +14,7 @@ namespace Game1
     {
         BinaryWriter bw;
         BinaryReader br;
-        List<Projectile> projectileList;
+        public List<Projectile> projectileList { get; set; }
         int shotSpeed;
         int shotSize;
         Texture2D shotTex;
@@ -59,7 +59,7 @@ namespace Game1
             }
         }
 
-        private void SaveData(BinaryWriter bw)
+        private void SaveData(BinaryWriter bw)//FIX
         {
             bw = new BinaryWriter(new FileStream("SpelareStats.dat", FileMode.OpenOrCreate, FileAccess.Write));
             bw.Write(hp);
@@ -164,7 +164,7 @@ namespace Game1
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(textur, hitbox, Color.White);
+            base.Draw(spriteBatch);
             for (int i = 0; i < projectileList.Count; i++)
             {
                 projectileList[i].Draw(spriteBatch);
