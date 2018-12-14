@@ -12,10 +12,9 @@ namespace Game1
     {
         public int BounceTimes { get; set; }
 
-        public Shot(Texture2D tex, Vector2 pos, int speed, int size) : base(tex, pos, speed, size)
+        public Shot(Texture2D tex, Vector2 pos, int speed, int size, int dmg) : base(tex, pos, speed, size, dmg)
         {
             BounceTimes = 2;
-            dmg = 1;
         }
 
         public override void Update(Karta karta)

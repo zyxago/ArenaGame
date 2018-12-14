@@ -12,46 +12,36 @@ namespace Game1
 {
     class Spelare:Karaktär
     {
-        BinaryWriter bw;
-        BinaryReader br;
         public List<Projectile> projectileList { get; set; }
         int shotSpeed;
         int shotSize;
         Texture2D shotTex;
         public Spelare(Texture2D tex, Vector2 pos, Texture2D shotTex):base(tex, pos)
         {
-            LoadData(br, bw);
+            LoadData();
             projectileList = new List<Projectile>();
             this.shotTex = shotTex;
+            dmg = 1;
         }
 
-        private void LoadData(BinaryReader br, BinaryWriter bw)
+        private void LoadData()
         {
+            BinaryReader br;
             if (!File.Exists("SpelareStats.dat"))
             {
-                bw = new BinaryWriter(new FileStream("SpelareStats.dat", FileMode.OpenOrCreate, FileAccess.Write));
-                bw.Write(3);//hp
-                bw.Write(30);//size
-                bw.Write(3);//speed
-                bw.Write(8);//shotSize
-                bw.Write(5);//shotSpeed
-                bw.Write(20);//attackDelay
-                bw.Close();
-                br = new BinaryReader(new FileStream("SpelareStats.dat", FileMode.Open, FileAccess.Read));
-                hp = br.ReadInt32();
-                size = br.ReadInt32();
-                speed = br.ReadInt32();
-                shotSize = br.ReadInt32();
-                shotSpeed = br.ReadInt32();
-                attackDelay = br.ReadInt32();
-                br.Close();
+                hp = 3;
+                size = 30;
+                speed = 3;
+                shotSize = 8;
+                shotSpeed = 5;
+                attackDelay = 20;
             }
             else
             {
                 br = new BinaryReader(new FileStream("SpelareStats.dat", FileMode.Open, FileAccess.Read));
                 hp = br.ReadInt32();
                 size = br.ReadInt32();
-                speed = br.ReadInt32();
+                speed = (float)br.ReadDouble();
                 shotSize = br.ReadInt32();
                 shotSpeed = br.ReadInt32();
                 attackDelay = br.ReadInt32();
@@ -59,12 +49,13 @@ namespace Game1
             }
         }
 
-        private void SaveData(BinaryWriter bw)//FIX
+        private void SaveData()
         {
+            BinaryWriter bw;
             bw = new BinaryWriter(new FileStream("SpelareStats.dat", FileMode.OpenOrCreate, FileAccess.Write));
             bw.Write(hp);
             bw.Write(size);
-            bw.Write(speed);
+            bw.Write((double)speed);
             bw.Write(shotSize);
             bw.Write(shotSpeed);
             bw.Write(attackDelay);
@@ -92,14 +83,14 @@ namespace Game1
             }
             if (Keyboard.GetState().IsKeyDown(Keys.P))
             {
-                SaveData(bw);
+                SaveData();
             }
             base.Update(karta);
         }
 
         private void Attack()
         {
-            projectileList.Add(new Shot(shotTex, new Vector2(position.X + size / 2, position.Y + size / 2), shotSpeed, shotSize));
+            projectileList.Add(new Shot(shotTex, new Vector2(position.X + size / 2, position.Y + size / 2), shotSpeed, shotSize, dmg));
         }
 
         public override void Move()

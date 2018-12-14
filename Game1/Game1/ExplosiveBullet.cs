@@ -11,7 +11,7 @@ namespace Game1
     class ExplosiveBullet:Projectile//W.I.P
     {
         public int explosiveRange;
-        public ExplosiveBullet(Texture2D tex, Vector2 pos, int speed, int size) : base(tex, pos, speed, size)
+        public ExplosiveBullet(Texture2D tex, Vector2 pos, int speed, int size, int dmg) : base(tex, pos, speed, size, dmg)
         {
             explosiveRange = 3;
         }

@@ -27,12 +27,13 @@ namespace Game1
         SpriteBatch spriteBatch;
         Karta karta;
         List<Karaktär> karaktärsList = new List<Karaktär>();
-        Texture2D spelareTex;
-        Texture2D stenTex, markTex;
-        Texture2D shotTex;
-        Texture2D kartaTex;
-        Vector2 StartPos = new Vector2(80, 80);
+        Texture2D spelareTex, stenTex, markTex, shotTex, kartaTex;
+        Vector2 StartPos;
         SpriteFont font1;
+        int score;
+        List<int> scoretable = new List<int>();
+        BinaryWriter bw;
+        BinaryReader br;
 
         public Game1()
         {
@@ -51,10 +52,15 @@ namespace Game1
             // TODO: Add your initialization logic here
             base.Initialize();
             IsMouseVisible = true;
-            karaktärsList.Add(new Spelare(spelareTex, StartPos, shotTex));
             karta = new Karta(kartaTex, new Vector2(0, 0), stenTex, markTex);
             window = Window.ClientBounds;
             rng = new Random();
+            br = new BinaryReader(new FileStream("scoretable.dat", FileMode.OpenOrCreate, FileAccess.Read));
+            while(br.BaseStream.Position != br.BaseStream.Length)
+            {
+                scoretable.Add(br.ReadInt32());
+            }
+            br.Close();
         }
 
         /// <summary>
@@ -96,45 +102,60 @@ namespace Game1
             if(gameState == Meny.main)
             {
                 if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+                {
                     gameState = Meny.play;
+                }
+            }
+            else if(gameState == Meny.restart)
+            {
+                karaktärsList.Clear();
+                gameState = Meny.play;
             }
             else if(gameState == Meny.play)
             {
-                /*if(karaktärsList.Count <= 1)//test, add enemy
+                if(karaktärsList.Count == 0)
+                {
+                    StartPos = new Vector2(window.Width / 2 - 15, window.Height / 2 - 15);
+                    karaktärsList.Add(new Spelare(spelareTex, StartPos, shotTex));
+                }
+                if(karaktärsList.Count <= 1)//test, add enemy
                 {
                     for (int i = 0; i < 10; i++)
                     {
-                        karaktärsList.Add(new Enemy(spelareTex, new Vector2(400, 200)));
+                        karaktärsList.Add(new Enemy(spelareTex, new Vector2(80,80)));
                     }
-                }*/
-                foreach(Karaktär karaktär in karaktärsList)
+                }
+                for(int i = 0; i < karaktärsList.Count; i++)
                 {
-                    karaktär.Update(karta);
-                    if(karaktär is Enemy)
+                    karaktärsList[i].Update(karta);
+                    if(karaktärsList[i] is Enemy)
                     {
-                        if(karaktär.isDead == true)
+                        if(karaktärsList[i].isDead == true)
                         {
-                            karaktärsList.Remove(karaktär);
+                            karaktärsList.Remove(karaktärsList[i]);
+                            score++;
+                            i--;
+                            continue;
                         }
-                        foreach(Karaktär karaktär2 in karaktärsList)
+                        foreach(Karaktär karaktär in karaktärsList)
                         {
-                            if (karaktär.hitbox.Intersects(karaktär2.hitbox) && karaktär2 is Spelare)
+                            if (karaktärsList[i].hitbox.Intersects(karaktär.hitbox) && karaktär is Spelare)
                             {
-                                karaktär2.hp -= karaktär.dmg;
+                                karaktär.hp -= karaktärsList[i].dmg;
                             }
                         }
                     }
-                    if(karaktär is Spelare)
+                    if(karaktärsList[i] is Spelare)
                     {
                         //Check if projectile intersects enemy
-                        Spelare spelare = karaktär as Spelare;
+                        Spelare spelare = karaktärsList[i] as Spelare;
                         foreach(Projectile projectile in spelare.projectileList)
                         {
-                            foreach(Karaktär karaktär2 in karaktärsList)
+                            foreach(Karaktär karaktär in karaktärsList)
                             {
-                                if (projectile.Hitbox.Intersects(karaktär2.hitbox) && karaktär2 is Enemy)
+                                if (projectile.Hitbox.Intersects(karaktär.hitbox) && karaktär is Enemy)
                                 {
-                                    karaktär2.hp -= projectile.dmg;
+                                    karaktär.hp -= projectile.dmg;
                                 }
                             }
                         }
@@ -143,9 +164,9 @@ namespace Game1
                             gameState = Meny.gameover;
                         }
                     }
-                    if(karaktär.hp <= 0)
+                    if(karaktärsList[i].hp <= 0)
                     {
-                        karaktär.isDead = true;
+                        karaktärsList[i].isDead = true;
                     }
                 }
                 karta.Update();
@@ -153,6 +174,18 @@ namespace Game1
             }
             else if(gameState == Meny.gameover)
             {
+                if(score != 0)
+                {
+                    scoretable.Add(score);
+                    scoretable.Sort((a, b) => -1 * a.CompareTo(b));
+                    score = 0;
+                }
+                bw = new BinaryWriter(new FileStream("scoretable.dat", FileMode.OpenOrCreate, FileAccess.Write));
+                for(int i = 0; i < scoretable.Count; i++)
+                {
+                    bw.Write(scoretable[i]);
+                }
+                bw.Close();
                 if (Keyboard.GetState().IsKeyDown(Keys.Enter))
                 {
                     gameState = Meny.restart;
@@ -170,11 +203,17 @@ namespace Game1
             spriteBatch.Begin();
             if(gameState == Meny.main)
             {
-                spriteBatch.DrawString(font1, "Press Enter to start", new Vector2(300,200), Color.Black);
+                spriteBatch.DrawString(font1, "Press Enter to start", new Vector2(300,100), Color.Black);
+                spriteBatch.DrawString(font1, "Highscore", new Vector2(300, 120), Color.Black);
+                for (int i = 0; i < scoretable.Count; i++)
+                {
+                    spriteBatch.DrawString(font1, (i+1)+": "+scoretable[i],new Vector2(300, 150+(i*20)),Color.Black);
+                }
             }
             else if(gameState == Meny.play)
             {
                 karta.Draw(spriteBatch);
+                spriteBatch.DrawString(font1, "Score: " + score, new Vector2(10, 10), Color.Black);
                 foreach (Karaktär karaktär in karaktärsList)
                 {
                     karaktär.Draw(spriteBatch);
@@ -182,6 +221,7 @@ namespace Game1
             }
             else if(gameState == Meny.gameover)
             {
+                karta.Draw(spriteBatch);
                 spriteBatch.DrawString(font1, "GAMEOVER", new Vector2(300, 200), Color.Black);
                 spriteBatch.DrawString(font1, "Press Enter to restart", new Vector2(280, 220), Color.Black);
             }

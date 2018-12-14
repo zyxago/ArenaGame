@@ -20,13 +20,14 @@ namespace Game1
         public Rectangle Hitbox { get; set; }
         public bool IsDead { get; set; }
 
-        public Projectile(Texture2D tex, Vector2 pos, int speed, int size)
+        public Projectile(Texture2D tex, Vector2 pos, int speed, int size, int dmg)
         {
             IsDead = false;
             this.tex = tex;
             this.pos = pos;
             this.speed = speed;
             this.size = size;
+            this.dmg = dmg;
             Hitbox = new Rectangle((int)pos.X, (int)pos.Y, size, size);
             Direction();
         }
