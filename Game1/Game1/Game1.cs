@@ -122,24 +122,20 @@ namespace Game1
                     enemyHP = 3;
                 }
             }
-            else if(gameState == Meny.restart)
-            {
-                gameState = Meny.play;
-            }
             else if(gameState == Meny.play)
             {
                 //Difficulity
                 if(score == 10)
                 {
-                    spawnTimer = 80;
+                    spawnTimer = 30;
                 }
                 else if(score == 25)
                 {
-                    spawnTimer = 60;
+                    spawnTimer = 20;
                 }
                 else if(score >= 50)
                 {
-                    spawnTimer = 40;
+                    spawnTimer = 10;
                 }
                 else if(score >= 99)
                 {
@@ -221,7 +217,7 @@ namespace Game1
                 bw.Close();
                 if (Keyboard.GetState().IsKeyDown(Keys.R))
                 {
-                    gameState = Meny.restart;
+                    gameState = Meny.play;
                 }
                 else if (Keyboard.GetState().IsKeyDown(Keys.E))
                 {

@@ -13,6 +13,7 @@ namespace Game1
         Vector2 direction;
         int defaultDirTime = 20;
         int dirTime;
+        bool move;
 
         public Enemy(Texture2D tex, Vector2 pos, int hp):base(tex, pos)
         {
@@ -22,10 +23,12 @@ namespace Game1
             speed = 3;
             attackDelay = 20;
             dirTime = defaultDirTime;
+            Direction();
         }
 
         public override void Update(Karta karta)
         {
+            move = true;
             CheckWallCollision(karta);
             Move();
             if(dirTime <= 0)
@@ -36,54 +39,24 @@ namespace Game1
             dirTime--;
             base.Update(karta);
         }
-        //W.I.P
         private void CheckWallCollision(Karta karta)
         {
             collisionDir = CollisionDir.None;
             foreach (Grid grid in karta.gridArray)
             {
-                //Check wall collision
-                hitboxTemp = new Rectangle((int)position.X, (int)(position.Y - speed), size, size);
-                if (hitboxTemp.Intersects(grid.GridBox) && grid.isSolid)
+                if(hitbox.Intersects(grid.GridBox) && grid.isSolid)
                 {
-                    collisionDir |= CollisionDir.North;
-                }
-                hitboxTemp = new Rectangle((int)(position.X ), (int)(position.Y + speed), size, size);
-                if (hitboxTemp.Intersects(grid.GridBox) && grid.isSolid)
-                {
-                    collisionDir |= CollisionDir.South;
-                }
-                hitboxTemp = new Rectangle((int)(position.X - speed), (int)position.Y, size, size);
-                if (hitboxTemp.Intersects(grid.GridBox) && grid.isSolid)
-                {
-                    collisionDir |= CollisionDir.West;
-                }
-                hitboxTemp = new Rectangle((int)(position.X + speed), (int)position.Y, size, size);
-                if (hitboxTemp.Intersects(grid.GridBox) && grid.isSolid)
-                {
-                    collisionDir |= CollisionDir.East;
+                    direction.X = -direction.X;
+                    direction.Y = -direction.Y;
+                    break;
                 }
             }
         }
 
         public override void Move()
         {
-            if ((collisionDir & CollisionDir.North) != CollisionDir.North && position.Y > 0)
-            {
-                position.Y -= speed * direction.Y;
-            }
-            else if ((collisionDir & CollisionDir.South) != CollisionDir.South && position.Y < Game1.window.Height)
-            {
-                position.Y += speed * direction.Y;
-            }
-            if ((collisionDir & CollisionDir.West) != CollisionDir.West && position.X > 0)
-            {
-                position.X -= speed * direction.X;
-            }
-            else if ((collisionDir & CollisionDir.East) != CollisionDir.East && position.X < Game1.window.Width)
-            {
-                position.X += speed * direction.X;
-            }
+            position.Y += speed * direction.Y;
+            position.X += speed * direction.X;
         }
 
         private void Direction()
