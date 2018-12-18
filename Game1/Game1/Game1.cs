@@ -55,8 +55,8 @@ namespace Game1
             karta = new Karta(kartaTex, new Vector2(0, 0), stenTex, markTex);
             window = Window.ClientBounds;
             rng = new Random();
+            spawnTimer = 60;
             br = new BinaryReader(new FileStream("scoretable.dat", FileMode.OpenOrCreate, FileAccess.Read));
-            spawnTimer = 150;
             enemyHP = 1;
             while (br.BaseStream.Position != br.BaseStream.Length)
             {
@@ -224,6 +224,7 @@ namespace Game1
                     gameState = Meny.main;
                 }
                 karaktärsList.Clear();
+                spawnTimer = 60;
             }
         }
         
