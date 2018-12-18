@@ -27,10 +27,10 @@ namespace Game1
         SpriteBatch spriteBatch;
         Karta karta;
         List<Karaktär> karaktärsList = new List<Karaktär>();
-        Texture2D spelareTex, stenTex, markTex, shotTex, kartaTex;
+        Texture2D spelareTex, stenTex, markTex, shotTex, kartaTex, enemyTex;
         Vector2 StartPos;
         SpriteFont font1;
-        int score;
+        int score, enemyHP, spawnTimer, tempSpawnTimer;
         List<int> scoretable = new List<int>();
         BinaryWriter bw;
         BinaryReader br;
@@ -56,7 +56,9 @@ namespace Game1
             window = Window.ClientBounds;
             rng = new Random();
             br = new BinaryReader(new FileStream("scoretable.dat", FileMode.OpenOrCreate, FileAccess.Read));
-            while(br.BaseStream.Position != br.BaseStream.Length)
+            spawnTimer = 150;
+            enemyHP = 1;
+            while (br.BaseStream.Position != br.BaseStream.Length)
             {
                 scoretable.Add(br.ReadInt32());
             }
@@ -72,10 +74,11 @@ namespace Game1
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             spelareTex = Content.Load<Texture2D>("Karaktärer/karaktär");
+            enemyTex = Content.Load<Texture2D>("Karaktärer/Enemy");
             stenTex = Content.Load<Texture2D>("Miljö/stenBlock");
             markTex = Content.Load<Texture2D>("Miljö/markBlock");
             kartaTex = Content.Load<Texture2D>("Miljö/map");
-            shotTex = Content.Load<Texture2D>("Miljö/stenBlock"); //Temporary
+            shotTex = Content.Load<Texture2D>("Projectile/shot");
             font1 = Content.Load<SpriteFont>("font1");
             // TODO: use this.Content to load your game content here
         }
@@ -105,26 +108,55 @@ namespace Game1
                 {
                     gameState = Meny.play;
                 }
+                //Difficulity
+                else if (Keyboard.GetState().IsKeyDown(Keys.D1))
+                {
+                    enemyHP = 1;
+                }
+                else if (Keyboard.GetState().IsKeyDown(Keys.D2))
+                {
+                    enemyHP = 2;
+                }
+                else if (Keyboard.GetState().IsKeyDown(Keys.D3))
+                {
+                    enemyHP = 3;
+                }
             }
             else if(gameState == Meny.restart)
             {
-                karaktärsList.Clear();
                 gameState = Meny.play;
             }
             else if(gameState == Meny.play)
             {
-                if(karaktärsList.Count == 0)
+                //Difficulity
+                if(score == 10)
                 {
-                    StartPos = new Vector2(window.Width / 2 - 15, window.Height / 2 - 15);
+                    spawnTimer = 80;
+                }
+                else if(score == 25)
+                {
+                    spawnTimer = 60;
+                }
+                else if(score >= 50)
+                {
+                    spawnTimer = 40;
+                }
+                else if(score >= 99)
+                {
+                    spawnTimer = 5;
+                }
+                if(karaktärsList.Count == 0)//Lägger till spelaren
+                {
+                    StartPos = new Vector2(80,80);
                     karaktärsList.Add(new Spelare(spelareTex, StartPos, shotTex));
                 }
-                if(karaktärsList.Count <= 1)//test, add enemy
+                if(tempSpawnTimer <= 0)//Lägger till fiender
                 {
-                    for (int i = 0; i < 10; i++)
-                    {
-                        karaktärsList.Add(new Enemy(spelareTex, new Vector2(80,80)));
-                    }
+                    karaktärsList.Add(new Enemy(enemyTex, new Vector2(window.Width / 2 - 20, window.Height / 2 - 20), enemyHP));
+                    tempSpawnTimer = spawnTimer;
                 }
+                tempSpawnTimer--;
+                //Karaktär logic:
                 for(int i = 0; i < karaktärsList.Count; i++)
                 {
                     karaktärsList[i].Update(karta);
@@ -149,13 +181,14 @@ namespace Game1
                     {
                         //Check if projectile intersects enemy
                         Spelare spelare = karaktärsList[i] as Spelare;
-                        foreach(Projectile projectile in spelare.projectileList)
+                        for (int j = 0; spelare.projectileList.Count > j; j++)
                         {
                             foreach(Karaktär karaktär in karaktärsList)
                             {
-                                if (projectile.Hitbox.Intersects(karaktär.hitbox) && karaktär is Enemy)
+                                if (spelare.projectileList[j].Hitbox.Intersects(karaktär.hitbox) && karaktär is Enemy)
                                 {
-                                    karaktär.hp -= projectile.dmg;
+                                    karaktär.hp -= spelare.projectileList[j].dmg;
+                                    spelare.projectileList[j].IsDead = true;
                                 }
                             }
                         }
@@ -186,10 +219,15 @@ namespace Game1
                     bw.Write(scoretable[i]);
                 }
                 bw.Close();
-                if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+                if (Keyboard.GetState().IsKeyDown(Keys.R))
                 {
                     gameState = Meny.restart;
                 }
+                else if (Keyboard.GetState().IsKeyDown(Keys.E))
+                {
+                    gameState = Meny.main;
+                }
+                karaktärsList.Clear();
             }
         }
         
@@ -203,11 +241,28 @@ namespace Game1
             spriteBatch.Begin();
             if(gameState == Meny.main)
             {
-                spriteBatch.DrawString(font1, "Press Enter to start", new Vector2(300,100), Color.Black);
-                spriteBatch.DrawString(font1, "Highscore", new Vector2(300, 120), Color.Black);
+                spriteBatch.DrawString(font1, "Press 'Enter' to start", new Vector2(300,100), Color.Black);
+                spriteBatch.DrawString(font1, "Highscore", new Vector2(150, 120), Color.Black);
+                spriteBatch.DrawString(font1, "Press '1' '2' or '3' to change difficulity", new Vector2(300, 140), Color.Black);
                 for (int i = 0; i < scoretable.Count; i++)
                 {
-                    spriteBatch.DrawString(font1, (i+1)+": "+scoretable[i],new Vector2(300, 150+(i*20)),Color.Black);
+                    spriteBatch.DrawString(font1, (i+1)+": "+scoretable[i],new Vector2(150, 150+(i*20)),Color.Black);
+                    if(i >= 9)
+                    {
+                        break;
+                    }
+                }
+                if (Keyboard.GetState().IsKeyDown(Keys.D1))
+                {
+                    spriteBatch.DrawString(font1, "Difficulity changed!", new Vector2(300, 160), Color.Black);
+                }
+                else if (Keyboard.GetState().IsKeyDown(Keys.D2))
+                {
+                    spriteBatch.DrawString(font1, "Difficulity changed!", new Vector2(300, 160), Color.Black);
+                }
+                else if (Keyboard.GetState().IsKeyDown(Keys.D3))
+                {
+                    spriteBatch.DrawString(font1, "Difficulity changed!", new Vector2(300, 160), Color.Black);
                 }
             }
             else if(gameState == Meny.play)
@@ -223,7 +278,8 @@ namespace Game1
             {
                 karta.Draw(spriteBatch);
                 spriteBatch.DrawString(font1, "GAMEOVER", new Vector2(300, 200), Color.Black);
-                spriteBatch.DrawString(font1, "Press Enter to restart", new Vector2(280, 220), Color.Black);
+                spriteBatch.DrawString(font1, "Press 'R' to restart", new Vector2(280, 220), Color.Black);
+                spriteBatch.DrawString(font1, "Press 'E' to enter main menu", new Vector2(280, 240), Color.Black);
             }
 
             spriteBatch.End();

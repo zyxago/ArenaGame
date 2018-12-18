@@ -16,6 +16,7 @@ namespace Game1
         int shotSpeed;
         int shotSize;
         Texture2D shotTex;
+
         public Spelare(Texture2D tex, Vector2 pos, Texture2D shotTex):base(tex, pos)
         {
             LoadData();
@@ -112,6 +113,7 @@ namespace Game1
                 position.X += speed;
             }
         }
+
         private void CheckWallCollision(Karta karta)
         {
             collisionDir = CollisionDir.None;

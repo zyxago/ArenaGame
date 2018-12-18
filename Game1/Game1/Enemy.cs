@@ -14,10 +14,10 @@ namespace Game1
         int defaultDirTime = 20;
         int dirTime;
 
-        public Enemy(Texture2D tex, Vector2 pos):base(tex, pos)
+        public Enemy(Texture2D tex, Vector2 pos, int hp):base(tex, pos)
         {
             dmg = 1;
-            hp = 1;
+            this.hp = hp;
             size = 40;
             speed = 3;
             attackDelay = 20;
@@ -36,7 +36,7 @@ namespace Game1
             dirTime--;
             base.Update(karta);
         }
-
+        //W.I.P
         private void CheckWallCollision(Karta karta)
         {
             collisionDir = CollisionDir.None;
